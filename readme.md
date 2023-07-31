@@ -1,4 +1,4 @@
 For launch test use :
-`npx start`
+`npx jest`
 
 See the **.env** to know on which server to launch
