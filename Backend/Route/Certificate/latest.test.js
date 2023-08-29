@@ -3,12 +3,44 @@ const supertest = require('supertest');
 const request = supertest(`${process.env.URL}`);
 
 describe('Certificate API', () => {
-  it('should return two objects in the response when accessing /certificate/latest/3', async () => {
-    const response = await request.get('/certificate/latest/2');
+  it('should return the specified number of objects in the response', async () => {
+    const response = await request.get('/certificate/latest/5'); // Change to the desired count
+    expect(response.status).toBe(200);
+  
+    const responseData = JSON.parse(response.text);
+    expect(Array.isArray(responseData)).toBe(true);
+    expect(responseData.length).toBe(5); // Change to the expected count
+  });
+
+  // it('should handle negative count and return appropriate status', async () => {
+  //   const response = await request.get('/certificate/latest/-1');
+  //   expect(response.status).toBe(/* /!\  Le test n'ai pas gérais dans l'api il y a une erreur*/);
+  // });
+
+  it('should handle zero count and return appropriate status', async () => {
+    const response = await request.get('/certificate/latest/0');
     expect(response.status).toBe(200);
 
     const responseData = JSON.parse(response.text);
+    expect(responseData).toStrictEqual([]);
+  });
+
+  it('should return objects with expected fields in the response', async () => {
+    const count = 2; // Number of certificates to retrieve
+    const response = await request.get(`/certificate/latest/${count}`);
+    expect(response.status).toBe(200);
+  
+    const responseData = JSON.parse(response.text);
     expect(Array.isArray(responseData)).toBe(true);
-    expect(responseData.length).toBe(2);
+  
+    for (const certificate of responseData) {
+      expect(certificate).toHaveProperty('blockNumber');
+      expect(certificate).toHaveProperty('tokenId');
+      expect(certificate).toHaveProperty('jsonCid');
+      expect(certificate).toHaveProperty('imgCid');
+      expect(certificate).toHaveProperty('name');
+      expect(certificate).toHaveProperty('description');
+      expect(certificate).toHaveProperty('date');
+    }
   });
 });
